@@ -23,17 +23,20 @@ __email__ = "jq.wang1214@gmail.com"
 
 
 class TG(object):
-    def __init__(self, shape: Tuple[int]) -> None:
+    def __init__(self, length: int=1, debug: bool=False) -> None:
         """
         Parameters
         ----------
-        shape : Tuple[int]
-                shape of generated PRN array
+        length : int
+                length of generated PRN array
         """
         self.r = self.q = self.l = 0
-        self.shape = shape
+        self.debug = debug
+        if length <= 0:
+            raise ValueError("Length must be a positive integer!")
+        self.length = length
 
-    def get_bits(self) -> numpy.ndarray:
+    def get_bits(self) -> np.ndarray:
         """
         Get raw bits
 
@@ -61,7 +64,7 @@ class TG(object):
         self.q = q
         self.l = l
 
-    def convert(self, bits: numpy.ndarray) -> numpy.ndarray:
+    def convert(self, bits: np.ndarray) -> np.ndarray:
         """
         Convert bits into decimals
 
@@ -75,7 +78,7 @@ class TG(object):
             res += bit * np.power(2, (len(bits) - index - 1))
         return res
 
-    def random(self) -> numpy.ndarray:
+    def random(self) -> np.ndarray:
         """
         Generate random numbers using Tauworthe method
         """
@@ -85,15 +88,44 @@ class TG(object):
             self.seed()
 
         # length is the number of bits we need
-        self.length = np.prod(shape) * self.l
+        self.length_bit = self.length * self.l
+        self.verbose(f"self.length_bit = {self.length_bit}")
 
         # initialize the array B
-        self.B = np.ones(self.length)
+        self.B = np.ones(self.length_bit)
 
         # extend array B
-        for i in range(q, self.length):
+        for i in range(self.q, self.length_bit):
             new_bit = 1 if self.B[i - self.r] != self.B[i - self.q] else 0
-            self.B.append(new_bit)
+            self.B[i] = new_bit
 
-        self.B = np.split(self.B, self.l)
-        self.decimal = self.convert(self.B)
+        self.verbose(f"Before splitting, self.B is {self.B}")
+
+        self.B = np.array_split(self.B, self.length)
+
+        self.verbose(f"After splitting, self.B is {self.B}")
+
+        self.decimal = np.array([self.convert(seg)/np.power(2, self.l) for seg in self.B])
+
+        return self.decimal
+
+    def verbose(self, *args, **kwargs) -> None:
+        """
+        Customized print function for debug
+        """
+        if self.debug:
+            print(*args, **kwargs)
+
+
+def main() -> None:
+    tg = TG(length=10, debug=True)
+    res = tg.random()
+    print(res)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
