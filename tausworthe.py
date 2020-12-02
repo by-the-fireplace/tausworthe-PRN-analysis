@@ -23,13 +23,33 @@ __email__ = "jq.wang1214@gmail.com"
 
 
 class TG(object):
-	def __init__(self, shape: Tuple[int], r: int=3, q: int=5, l: int=4) -> None:
+	def __init__(self, shape: Tuple[int]) -> None:
 		"""
 		Parameters
 	    ----------
 	    shape : Tuple[int]
 	        shape of generated PRN array
-	    r : int
+		"""
+		self.r = self.q = self.l = 0
+		self.shape = shape
+
+
+	def get_bits(self) -> numpy.ndarray:
+		"""
+		Get raw bits 
+
+		"""
+		return self.B
+
+
+	def seed(self, r: int=3, q: int=5, l: int=4):
+		"""
+		Define a seed for the PRN generator
+		Seeds are defined by r, q and l
+
+		Parameters
+	    ----------
+		r : int
 	       	as defined in 
 	       	B[i] = (B[i−r] +B[i−q]) mod 2 = B[i−r] XOR B[i−q] (0 < r < q)
 	    q : int
@@ -39,11 +59,35 @@ class TG(object):
 	        lengths of bits in base 2
 	        Use (l-bits in base 2)/2^l and convert to base 10
 		"""
-		
 		self.r = r
 		self.q = q
 		self.l = l
 
+
+	def convert(self, bits: numpy.ndarray) -> numpy.ndarray:
+		"""
+		Convert bits into decimals
+
+		Parameters
+	    ----------
+	    bits : numpy.ndarray
+	        bits to be converted
+		"""
+		res = 0
+		for index, bit in enumerate(bits):
+			res += bit * np.power(2, (len(bits)-index-1))
+		return res
+
+
+	def random(self) -> numpy.ndarray:
+		"""
+		Generate random numbers using Tauworthe method
+		"""
+
+		# check whether seed was initialized
+		if self.r == 0 or self.q == 0 or self.l == 0:
+			self.seed()
+			
 		# length is the number of bits we need
 		self.length = np.prod(shape) * self.l
 
@@ -57,21 +101,6 @@ class TG(object):
 
 		self.B = np.split(self.B, self.l)
 		self.decimal = self.convert(self.B)
-
-
-	def get_bits(self) -> numpy.ndarray:
-		"""
-		Return
-		----------
-		B_copy (np.ndarray): 
-
-		"""
-		B_copy = self.B
-		return B_copy
-
-
-	def convert(self, array: numpy.ndarray) -> numpy.ndarray:
-
 
 
 
