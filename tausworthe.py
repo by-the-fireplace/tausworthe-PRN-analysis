@@ -13,24 +13,21 @@ https://homes.luddy.indiana.edu/kapadia/project2/node9.html
 TG belongs to LFSRs (linear feedback shift registers).
 """
 
-
 import numpy as np
-from typing import Tuple
-
 
 __author__ = "Jingquan Wang"
 __email__ = "jq.wang1214@gmail.com"
 
 
 class TG(object):
-    def __init__(self, length: int=1, debug: bool=False) -> None:
+    def __init__(self, length: int = 1, debug: bool = False) -> None:
         """
         Parameters
         ----------
         length : int
                 length of generated PRN array
         """
-        self.r = self.q = self.l = 0
+        self.r = self.q = self.chunk_len = 0
         self.debug = debug
         if length <= 0:
             raise ValueError("Length must be a positive integer!")
@@ -43,7 +40,7 @@ class TG(object):
         """
         return self.B
 
-    def seed(self, r: int = 3, q: int = 5, l: int = 4):
+    def seed(self, r: int = 3, q: int = 5, chunk_len: int = 4):
         """
         Define a seed for the PRN generator
         Seeds are defined by r, q and l
@@ -62,7 +59,7 @@ class TG(object):
         """
         self.r = r
         self.q = q
-        self.l = l
+        self.chunk_len = chunk_len
 
     def convert(self, bits: np.ndarray) -> np.ndarray:
         """
@@ -78,17 +75,17 @@ class TG(object):
             res += bit * np.power(2, (len(bits) - index - 1))
         return res
 
-    def random(self) -> np.ndarray:
+    def random(self, n_decimal: int = 3) -> np.ndarray:
         """
         Generate random numbers using Tauworthe method
         """
 
         # check whether seed was initialized
-        if self.r == 0 or self.q == 0 or self.l == 0:
+        if self.r == 0 or self.q == 0 or self.chunk_len == 0:
             self.seed()
 
         # length is the number of bits we need
-        self.length_bit = self.length * self.l
+        self.length_bit = self.length * self.chunk_len
         self.verbose(f"self.length_bit = {self.length_bit}")
 
         # initialize the array B
@@ -105,7 +102,12 @@ class TG(object):
 
         self.verbose(f"After splitting, self.B is {self.B}")
 
-        self.decimal = np.array([self.convert(seg)/np.power(2, self.l) for seg in self.B])
+        self.decimal = np.array(
+            [
+                round(self.convert(seg) / np.power(2, self.chunk_len), n_decimal)
+                for seg in self.B
+            ]
+        )
 
         return self.decimal
 
@@ -118,14 +120,11 @@ class TG(object):
 
 
 def main() -> None:
-    tg = TG(length=10, debug=True)
+    tg = TG(length=100)
+    tg.seed(r=5, q=17, chunk_len=19)
     res = tg.random()
-    print(res)
+    print(res.tolist())
+
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
