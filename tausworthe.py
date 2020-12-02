@@ -15,7 +15,7 @@ TG belongs to LFSRs (linear feedback shift registers).
 
 import numpy as np
 
-__author__ = "Jingquan Wang"
+__author__ = "James Wang"
 __email__ = "jq.wang1214@gmail.com"
 
 
