@@ -109,7 +109,22 @@ class TG(object):
             ]
         )
 
+        if 0 in self.decimal:
+            print(f"Warning: zero found in index {np.where(self.decimal == 0.0)}")
+            print(f"r = {self.r}; q = {self.q}; l = {self.chunk_len}")
+
         return self.decimal
+
+    def get_cycle(self) -> int:
+        """
+        Calculate length of a cycle in current TG arrays
+        """
+        try:
+            idx = np.where(self.decimal == self.decimal[0])[1]
+            return idx
+        except IndexError:
+            print(f"Cycle larger than {len(self.decimal)}.")
+            return 0
 
     def verbose(self, *args, **kwargs) -> None:
         """

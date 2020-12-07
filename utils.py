@@ -79,8 +79,9 @@ def visualize_pattern(
         sns_plot = sns.barplot(x=np.arange(len(a)), y=a, ax=ax)
 
     # handle x ticks frequency
+    x_size = len(sns_plot.get_xticklabels())
     for ind, label in enumerate(sns_plot.get_xticklabels()):
-        if ind % 10 == 0:  # every 10th label is kept
+        if ind % (x_size // 10) == 0:  # every 10th label is kept
             label.set_visible(True)
         else:
             label.set_visible(False)
