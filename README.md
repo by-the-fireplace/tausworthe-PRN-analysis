@@ -8,6 +8,7 @@ https://homes.luddy.indiana.edu/kapadia/project2/node9.html
 First setup conda virtual environment:
 
 ```
+git clone https://github.com/jingquan-wang/tausworthe-PRN-analysis.git
 cd tausworthe-PRN-analysis
 conda env create -f environment.yml
 conda activate tausworthe
